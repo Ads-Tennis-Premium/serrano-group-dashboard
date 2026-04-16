@@ -17,32 +17,36 @@ const BRD = '#282828'
 const TXT = '#FFFFFF'
 const SEC = '#8C8C8C'
 
-/* ── DATOS DIARIOS (60 días para cubrir rangos) ───────────── */
+/* ── DATOS DIARIOS (60 días) con escalas realistas ─────────── */
 function generateDailyData() {
   const data = []
   const today = new Date()
   for (let i = 59; i >= 0; i--) {
     const d = new Date(today)
     d.setDate(d.getDate() - i)
-    const base = 2000000 + Math.sin(i / 3) * 400000 + Math.random() * 500000
-    const spend = Math.round(base)
-    const impressions = Math.round(spend * (90 + Math.random() * 20))
-    const clicks = Math.round(impressions * (0.028 + Math.random() * 0.012))
-    const purchases = Math.round(clicks * (0.04 + Math.random() * 0.02))
-    const revenue = Math.round(spend * (3.8 + Math.random() * 1.4))
+    // Gasto diario entre ~1.8M y ~2.6M COP
+    const spend = Math.round(1800000 + Math.sin(i / 3) * 300000 + Math.random() * 500000)
+    const impressions = Math.round(spend * (90 + Math.random() * 20)) / 9 // ~20M-25M
+    const impressionsR = Math.round(impressions)
+    const clicks = Math.round(impressionsR * (0.028 + Math.random() * 0.012))
+    // CPA realista: ~COP 50000-80000, entonces purchases = spend / CPA target
+    const cpaTarget = 45000 + Math.random() * 25000
+    const purchases = Math.max(1, Math.round(spend / cpaTarget))
+    const roasBase = 3.8 + Math.random() * 1.4
+    const revenue = Math.round(spend * roasBase)
     const addToCart = Math.round(clicks * (0.22 + Math.random() * 0.08))
     const checkout = Math.round(addToCart * (0.42 + Math.random() * 0.1))
     data.push({
       date: d.toISOString().slice(0, 10),
       label: `${d.getDate()}/${d.getMonth() + 1}`,
       spend,
-      impressions,
+      impressions: impressionsR,
       clicks,
       purchases,
       revenue,
       addToCart,
       checkout,
-      ctr: +((clicks / impressions) * 100).toFixed(2),
+      ctr: +((clicks / impressionsR) * 100).toFixed(2),
       cpc: Math.round(spend / clicks),
       cpa: Math.round(spend / purchases),
       roas: +(revenue / spend).toFixed(2),
@@ -241,9 +245,9 @@ export default function App() {
         </div>
 
         <h1 style={{ fontSize:28, fontWeight:700, marginBottom:6 }}>Vista General</h1>
-        <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>{rangeLabel} · {sliced.length} día(s) · {agg.purchases} compras</div>
+        <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>{rangeLabel} · {sliced.length} día(s) · {agg.purchases.toLocaleString()} compras</div>
 
-        {/* CALENDARIO (solo si está seleccionado) */}
+        {/* CALENDARIO */}
         {range === 'cal' && (
           <div style={{ marginBottom:24 }}>
             <Calendar data={DAILY} selectedDate={selectedDate} onSelect={setSelectedDate} />
@@ -264,8 +268,8 @@ export default function App() {
           <KpiCard label="Impresiones" value={fmtNum(agg.impressions)} sub="totales" delta={11.3} />
         </div>
 
-        {/* GRÁFICO PRINCIPAL - Gasto + ROAS */}
-        {range !== 'cal' && (
+        {/* GRÁFICO PRINCIPAL */}
+        {range !== 'cal' && sliced.length > 1 && (
           <Card style={{ marginBottom:24 }}>
             <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>
               Gasto Diario (COP) &amp; ROAS — {rangeLabel} · Doble Eje Y
@@ -284,8 +288,8 @@ export default function App() {
           </Card>
         )}
 
-        {/* CPA + CTR DIARIO */}
-        {range !== 'cal' && (
+        {/* CPA + Embudo */}
+        {range !== 'cal' && sliced.length > 1 && (
           <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:16, marginBottom:24 }}>
             <Card>
               <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>CPA Diario (COP)</div>
@@ -331,11 +335,11 @@ export default function App() {
           </div>
         )}
 
-        {/* DETALLE DEL DÍA (solo en calendario) */}
-        {range === 'cal' && sliced[0] && (
+        {/* DETALLE DEL DÍA */}
+        {(range === 'cal' || range === '1') && sliced[0] && (
           <Card style={{ marginBottom:24 }}>
             <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>
-              Detalle del {selectedDate}
+              Detalle del {sliced[0].date}
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:16 }}>
               <div><div style={{ color:SEC, fontSize:11 }}>CTR</div><div style={{ fontSize:22, fontWeight:700 }}>{sliced[0].ctr}%</div></div>
@@ -346,7 +350,7 @@ export default function App() {
           </Card>
         )}
 
-        {/* CAMPAÑAS TABLE */}
+        {/* TABLA */}
         <Card>
           <div style={{ display:'flex', justifyContent:'space-between', marginBottom:16 }}>
             <div style={{ fontSize:15, fontWeight:600 }}>Top Campañas por Gasto</div>
