@@ -5,7 +5,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ComposedChart,
 } from 'recharts'
-import { useMetaData, ConnStatus, fmtMoney, fmtNum, fmtPct, fmtX, findAction, bestRoas } from './meta'
+import { useMetaData, ConnStatus } from './meta'
 
 /* ── COLORES ──────────────────────────────────────────────── */
 const AC  = '#C8714A'
