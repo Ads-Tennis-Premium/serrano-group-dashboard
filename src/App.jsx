@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
+  PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ComposedChart,
 } from 'recharts'
@@ -11,6 +12,8 @@ const ACL = '#e8916a'
 const GR  = '#4ADE80'
 const AM  = '#fbbf24'
 const RE  = '#f87171'
+const BL  = '#60a5fa'
+const PU  = '#a78bfa'
 const BG  = '#0d0d0d'
 const CRD = '#161616'
 const BRD = '#282828'
@@ -57,6 +60,59 @@ const CAMPAIGNS = [
   { id:6, name:'Video Ads - Tutoriales',           status:'PAUSED', budget:180000, spend:4200000,  impressions:890000,  clicks:19100, purchases:52,  ctr:2.15, cpc:220, cpa:80769, roas:2.8 },
 ]
 
+/* ── CREATIVIDADES ────────────────────────────────────────── */
+const CREATIVES = [
+  { id:1, emoji:'🎾', name:'Raqueta Head Speed Pro - Carrusel',   campaign:'Prospecting - Raquetas',  format:'Carrusel', spend:5200000, impressions:520000, clicks:19760, ctr:3.80, roas:6.2 },
+  { id:2, emoji:'🎥', name:'Video Dinámico - Carrito 15s',        campaign:'Retargeting - Carrito',    format:'Video',    spend:4800000, impressions:380000, clicks:15580, ctr:4.10, roas:7.3 },
+  { id:3, emoji:'🏷️', name:'Oferta Flash - 20% OFF',               campaign:'Lookalike - Compradores',  format:'Imagen',   spend:3200000, impressions:410000, clicks:11890, ctr:2.90, roas:4.2 },
+  { id:4, emoji:'👟', name:'Nike Air Zoom Vapor - Stories',        campaign:'Conversión - Zapatillas',  format:'Stories',  spend:2900000, impressions:290000, clicks:10150, ctr:3.50, roas:4.8 },
+  { id:5, emoji:'🎬', name:'¿Eres tenista? - Video 30s',           campaign:'Brand Awareness',           format:'Video',    spend:2100000, impressions:680000, clicks:12920, ctr:1.90, roas:2.0 },
+  { id:6, emoji:'🏆', name:'Roland Garros 2026 - Colección',       campaign:'Temporada - Torneos',       format:'Colección',spend:1800000, impressions:225000, clicks:6975,  ctr:3.10, roas:3.9 },
+  { id:7, emoji:'🎾', name:'Wilson Pro Staff - Imagen Única',      campaign:'Prospecting - Raquetas',   format:'Imagen',   spend:1600000, impressions:198000, clicks:5346,  ctr:2.70, roas:3.5 },
+  { id:8, emoji:'⭐', name:'Testimonio Cliente - Video 20s',       campaign:'Retargeting',               format:'Video',    spend:2400000, impressions:195000, clicks:8775,  ctr:4.50, roas:8.1 },
+  { id:9, emoji:'📺', name:'Tutorial Saque - Nivel Avanzado',      campaign:'Video Ads - Tutoriales',    format:'Video',    spend:890000,  impressions:215000, clicks:3870,  ctr:1.80, roas:1.5 },
+]
+
+/* ── AUDIENCIAS ───────────────────────────────────────────── */
+const AGE_GENDER = [
+  { age:'18-24', male:450000, female:380000, roas:4.1 },
+  { age:'25-34', male:890000, female:720000, roas:5.2 },
+  { age:'35-44', male:650000, female:510000, roas:4.8 },
+  { age:'45-54', male:320000, female:270000, roas:3.9 },
+  { age:'55+',   male:180000, female:140000, roas:3.2 },
+]
+const DEVICES = [
+  { name:'Móvil',      value:68 },
+  { name:'Escritorio', value:24 },
+  { name:'Tablet',     value:8 },
+]
+const GEO = [
+  { country:'Colombia',  flag:'🇨🇴', spend:38500000, impressions:3820000, clicks:121000, roas:4.8 },
+  { country:'México',    flag:'🇲🇽', spend:9200000,  impressions:890000,  clicks:28000,  roas:3.9 },
+  { country:'Argentina', flag:'🇦🇷', spend:5800000,  impressions:560000,  clicks:17500,  roas:3.5 },
+  { country:'España',    flag:'🇪🇸', spend:4200000,  impressions:410000,  clicks:13000,  roas:4.1 },
+  { country:'Chile',     flag:'🇨🇱', spend:2900000,  impressions:285000,  clicks:9000,   roas:3.7 },
+  { country:'Perú',      flag:'🇵🇪', spend:1800000,  impressions:175000,  clicks:5500,   roas:3.2 },
+  { country:'Ecuador',   flag:'🇪🇨', spend:890000,   impressions:87000,   clicks:2700,   roas:2.9 },
+  { country:'Uruguay',   flag:'🇺🇾', spend:520000,   impressions:51000,   clicks:1600,   roas:3.0 },
+]
+const PLACEMENTS = [
+  { name:'Facebook Feed',    spend:22000000, roas:4.9 },
+  { name:'Instagram Feed',   spend:18500000, roas:4.6 },
+  { name:'IG Stories',       spend:9800000,  roas:3.8 },
+  { name:'IG Reels',         spend:7200000,  roas:4.2 },
+  { name:'Audience Network', spend:3100000,  roas:2.8 },
+  { name:'FB Stories',       spend:2800000,  roas:3.4 },
+]
+const INTERESTS = [
+  { name:'Tenis',              audience:2400000, engagement:5.2 },
+  { name:'Padel',              audience:1100000, engagement:4.8 },
+  { name:'Deportes de raqueta',audience:1800000, engagement:4.5 },
+  { name:'Wilson / Head',      audience:680000,  engagement:6.1 },
+  { name:'Roland Garros',      audience:540000,  engagement:5.9 },
+  { name:'Nike Tennis',        audience:820000,  engagement:5.5 },
+]
+
 /* ── HELPERS ──────────────────────────────────────────────── */
 const fmtCOP   = n => '$' + (n / 1000000).toFixed(1) + 'M'
 const fmtNum   = n => n >= 1000000 ? (n / 1000000).toFixed(2) + 'M' : n >= 1000 ? (n / 1000).toFixed(1) + 'K' : n.toLocaleString()
@@ -81,7 +137,6 @@ function KpiCard({ label, value, delta, sub }) {
     </Card>
   )
 }
-
 function RangeSelector({ value, onChange }) {
   const opts = [
     { k:'1',   label:'Hoy' },
@@ -104,7 +159,6 @@ function RangeSelector({ value, onChange }) {
     </div>
   )
 }
-
 function Calendar({ data, selectedDate, onSelect }) {
   const today = new Date()
   const [viewMonth, setViewMonth] = useState(today.getMonth())
@@ -162,13 +216,11 @@ function Calendar({ data, selectedDate, onSelect }) {
 function PageOverview() {
   const [range, setRange] = useState('30')
   const [selectedDate, setSelectedDate] = useState(DAILY[DAILY.length - 1].date)
-
   const sliced = useMemo(() => {
     if (range === 'cal') return DAILY.filter(d => d.date === selectedDate)
     const n = parseInt(range, 10)
     return DAILY.slice(-n)
   }, [range, selectedDate])
-
   const agg = useMemo(() => {
     const sum = (k) => sliced.reduce((a, b) => a + b[k], 0)
     const spend = sum('spend'), impressions = sum('impressions'), clicks = sum('clicks')
@@ -182,9 +234,7 @@ function PageOverview() {
       roas: spend ? +(revenue / spend).toFixed(2) : 0,
     }
   }, [sliced])
-
   const rangeLabel = range === 'cal' ? `Día ${selectedDate}` : range === '1' ? 'Hoy' : `Últimos ${range} días`
-
   return (
     <>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', paddingBottom:20, borderBottom:`1px solid ${BRD}`, marginBottom:24 }}>
@@ -194,16 +244,9 @@ function PageOverview() {
           <RangeSelector value={range} onChange={setRange} />
         </div>
       </div>
-
       <h1 style={{ fontSize:28, fontWeight:700, marginBottom:6 }}>Vista General</h1>
       <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>{rangeLabel} · {sliced.length} día(s) · {agg.purchases.toLocaleString()} compras</div>
-
-      {range === 'cal' && (
-        <div style={{ marginBottom:24 }}>
-          <Calendar data={DAILY} selectedDate={selectedDate} onSelect={setSelectedDate} />
-        </div>
-      )}
-
+      {range === 'cal' && (<div style={{ marginBottom:24 }}><Calendar data={DAILY} selectedDate={selectedDate} onSelect={setSelectedDate} /></div>)}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:16, marginBottom:16 }}>
         <KpiCard label="Inversión Total" value={fmtCOP(agg.spend)} sub="COP" delta={14.8} />
         <KpiCard label="Ingresos Estimados" value={fmtCOP(agg.revenue)} sub={`ROAS ${agg.roas}x × Gasto`} delta={20.9} />
@@ -216,7 +259,6 @@ function PageOverview() {
         <KpiCard label="CPC Promedio" value={fmtMoney(agg.cpc)} sub="COP por clic" delta={-3.8} />
         <KpiCard label="Impresiones" value={fmtNum(agg.impressions)} sub="totales" delta={11.3} />
       </div>
-
       {range !== 'cal' && sliced.length > 1 && (
         <Card style={{ marginBottom:24 }}>
           <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>
@@ -281,12 +323,9 @@ function PageOverview() {
           </Card>
         </div>
       )}
-
       {(range === 'cal' || range === '1') && sliced[0] && (
         <Card style={{ marginBottom:24 }}>
-          <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>
-            Detalle del {sliced[0].date}
-          </div>
+          <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>Detalle del {sliced[0].date}</div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:16 }}>
             <div><div style={{ color:SEC, fontSize:11 }}>CTR</div><div style={{ fontSize:22, fontWeight:700 }}>{sliced[0].ctr}%</div></div>
             <div><div style={{ color:SEC, fontSize:11 }}>CPC</div><div style={{ fontSize:22, fontWeight:700 }}>{fmtMoney(sliced[0].cpc)}</div></div>
@@ -295,7 +334,6 @@ function PageOverview() {
           </div>
         </Card>
       )}
-
       <Card>
         <div style={{ display:'flex', justifyContent:'space-between', marginBottom:16 }}>
           <div style={{ fontSize:15, fontWeight:600 }}>Top Campañas por Gasto</div>
@@ -320,8 +358,7 @@ function PageOverview() {
                 <tr key={c.id}>
                   <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}` }}>{c.name}</td>
                   <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}` }}>
-                    <span style={{
-                      fontSize:11, padding:'3px 8px', borderRadius:6,
+                    <span style={{ fontSize:11, padding:'3px 8px', borderRadius:6,
                       background: c.status === 'ACTIVE' ? 'rgba(74,222,128,0.15)' : 'rgba(140,140,140,0.15)',
                       color: c.status === 'ACTIVE' ? GR : SEC,
                     }}>• {c.status === 'ACTIVE' ? 'Activa' : 'Pausada'}</span>
@@ -375,8 +412,7 @@ function PageCampaigns() {
               <tr key={c.id}>
                 <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}` }}>{c.name}</td>
                 <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}` }}>
-                  <span style={{
-                    fontSize:11, padding:'3px 8px', borderRadius:6,
+                  <span style={{ fontSize:11, padding:'3px 8px', borderRadius:6,
                     background: c.status === 'ACTIVE' ? 'rgba(74,222,128,0.15)' : 'rgba(140,140,140,0.15)',
                     color: c.status === 'ACTIVE' ? GR : SEC,
                   }}>• {c.status === 'ACTIVE' ? 'Activa' : 'Pausada'}</span>
@@ -438,42 +474,277 @@ function PageAnalytics() {
   )
 }
 
-/* ── PÁGINA: CREATIVIDADES (placeholder) ──────────────────── */
+/* ── PÁGINA: CREATIVIDADES (contenido real) ───────────────── */
 function PageCreatives() {
+  const [perf, setPerf] = useState('all')
+  const [fmt, setFmt]   = useState('all')
+
+  const formats = ['all', ...Array.from(new Set(CREATIVES.map(c => c.format)))]
+
+  const filtered = CREATIVES.filter(c => {
+    const okPerf = perf === 'all'
+      || (perf === 'top' && c.roas > 5)
+      || (perf === 'avg' && c.roas >= 2 && c.roas <= 5)
+      || (perf === 'low' && c.roas < 2)
+    const okFmt = fmt === 'all' || c.format === fmt
+    return okPerf && okFmt
+  })
+
+  const totalSpend = CREATIVES.reduce((s, c) => s + c.spend, 0)
+  const totalImpr  = CREATIVES.reduce((s, c) => s + c.impressions, 0)
+  const avgCtr     = (CREATIVES.reduce((s, c) => s + c.ctr, 0) / CREATIVES.length).toFixed(2)
+  const top = [...CREATIVES].sort((a,b) => b.roas - a.roas)[0]
+
+  const perfBtns = [
+    { k:'all', label:'Todos' },
+    { k:'top', label:'🏆 Top (>5x)' },
+    { k:'avg', label:'↗ Promedio (2–5x)' },
+    { k:'low', label:'↘ Bajo (<2x)' },
+  ]
+
+  const perfColor = r => r > 5 ? GR : r >= 2 ? AM : RE
+  const perfLabel = r => r > 5 ? '🏆 Top' : r >= 2 ? '↗ Promedio' : '↘ Bajo'
+
   return (
     <>
       <h1 style={{ fontSize:28, fontWeight:700, marginBottom:6 }}>Creatividades</h1>
-      <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>Biblioteca de anuncios — próximamente</div>
+      <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>Biblioteca de anuncios y rendimiento por creativo</div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:16, marginBottom:24 }}>
+        <KpiCard label="Total Creatividades" value={CREATIVES.length.toString()} sub="en rotación" />
+        <KpiCard label="Gasto Total" value={fmtCOP(totalSpend)} sub="todos los creativos" />
+        <KpiCard label="CTR Promedio" value={`${avgCtr}%`} sub="media general" delta={3.2} />
+        <KpiCard label="Mejor ROAS" value={`${top.roas}x`} sub={top.name.split(' - ')[0]} />
+      </div>
+
+      {/* Filtros */}
+      <div style={{ display:'flex', gap:10, marginBottom:20, flexWrap:'wrap', alignItems:'center' }}>
+        <select value={fmt} onChange={e => setFmt(e.target.value)}
+          style={{ background:CRD, border:`1px solid ${BRD}`, borderRadius:8, padding:'8px 14px', color:TXT, fontSize:13, outline:'none', cursor:'pointer' }}>
+          {formats.map(f => <option key={f} value={f}>{f === 'all' ? 'Todos los formatos' : f}</option>)}
+        </select>
+        {perfBtns.map(b => (
+          <button key={b.k} onClick={() => setPerf(b.k)}
+            style={{
+              padding:'8px 14px', borderRadius:8, fontSize:13, fontWeight:500, cursor:'pointer',
+              border: perf === b.k ? `1px solid ${AC}` : `1px solid ${BRD}`,
+              background: perf === b.k ? 'rgba(200,113,74,0.12)' : CRD,
+              color: perf === b.k ? AC : SEC,
+            }}>{b.label}</button>
+        ))}
+      </div>
+
+      {/* Grid de creatividades */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:16, marginBottom:24 }}>
+        {filtered.map(c => (
+          <Card key={c.id} style={{ padding:0, overflow:'hidden' }}>
+            <div style={{
+              position:'relative', aspectRatio:'16/9', background:BRD,
+              display:'flex', alignItems:'center', justifyContent:'center', fontSize:56
+            }}>
+              {c.emoji}
+              <div style={{
+                position:'absolute', top:10, right:10,
+                padding:'4px 10px', borderRadius:6, fontSize:11, fontWeight:600,
+                background:'rgba(0,0,0,0.6)', color:perfColor(c.roas),
+                border:`1px solid ${perfColor(c.roas)}40`,
+              }}>{perfLabel(c.roas)}</div>
+              <div style={{
+                position:'absolute', bottom:10, left:10,
+                padding:'4px 10px', borderRadius:6, fontSize:11,
+                background:'rgba(0,0,0,0.6)', color:TXT,
+              }}>{c.format}</div>
+            </div>
+            <div style={{ padding:16 }}>
+              <div style={{ fontSize:14, fontWeight:600, marginBottom:4 }}>{c.name}</div>
+              <div style={{ fontSize:11, color:SEC, marginBottom:12 }}>{c.campaign}</div>
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
+                <div>
+                  <div style={{ fontSize:10, color:SEC, textTransform:'uppercase', letterSpacing:0.5 }}>Gasto</div>
+                  <div style={{ fontSize:15, fontWeight:600 }}>{fmtCOP(c.spend)}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize:10, color:SEC, textTransform:'uppercase', letterSpacing:0.5 }}>Impresiones</div>
+                  <div style={{ fontSize:15, fontWeight:600 }}>{fmtNum(c.impressions)}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize:10, color:SEC, textTransform:'uppercase', letterSpacing:0.5 }}>CTR</div>
+                  <div style={{ fontSize:15, fontWeight:600 }}>{c.ctr}%</div>
+                </div>
+                <div>
+                  <div style={{ fontSize:10, color:SEC, textTransform:'uppercase', letterSpacing:0.5 }}>ROAS</div>
+                  <div style={{ fontSize:15, fontWeight:700, color:perfColor(c.roas) }}>{c.roas}x</div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Ranking por ROAS */}
       <Card>
-        <div style={{ textAlign:'center', padding:40, color:SEC }}>
-          <div style={{ fontSize:48, marginBottom:12 }}>🎨</div>
-          <div style={{ fontSize:16, fontWeight:600, color:TXT, marginBottom:8 }}>Sección en construcción</div>
-          <div>Aquí podrás ver el rendimiento de cada creatividad individualmente,
-          comparar versiones A/B y descargar los anuncios con mejor ROAS.</div>
-        </div>
+        <div style={{ fontSize:15, fontWeight:600, marginBottom:16 }}>Ranking por ROAS</div>
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={[...CREATIVES].sort((a,b) => b.roas - a.roas)} layout="vertical" margin={{ left:20 }}>
+            <CartesianGrid stroke={BRD} horizontal={false} />
+            <XAxis type="number" stroke={SEC} fontSize={11} tickFormatter={v => v + 'x'} />
+            <YAxis type="category" dataKey="name" stroke={SEC} fontSize={10} width={200} />
+            <Tooltip contentStyle={{ background:CRD, border:`1px solid ${BRD}`, borderRadius:8 }} formatter={v => v + 'x'} />
+            <Bar dataKey="roas" radius={[0,4,4,0]}>
+              {CREATIVES.map((c, i) => <Cell key={i} fill={perfColor(c.roas)} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </Card>
     </>
   )
 }
 
-/* ── PÁGINA: AUDIENCIAS (placeholder) ─────────────────────── */
+/* ── PÁGINA: AUDIENCIAS (contenido real) ──────────────────── */
 function PageAudiences() {
+  const deviceColors = [AC, BL, PU]
+  const roasColor = r => r > 4 ? GR : r >= 3 ? AM : RE
+  const totalAudienceReach = AGE_GENDER.reduce((s, a) => s + a.male + a.female, 0)
+  const topCountry = GEO[0]
+  const topPlacement = [...PLACEMENTS].sort((a,b) => b.roas - a.roas)[0]
+
   return (
     <>
       <h1 style={{ fontSize:28, fontWeight:700, marginBottom:6 }}>Audiencias</h1>
-      <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>Públicos personalizados y lookalikes — próximamente</div>
+      <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>Demografía, dispositivos, ubicaciones geográficas e intereses</div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:16, marginBottom:24 }}>
+        <KpiCard label="Alcance Total" value={fmtNum(totalAudienceReach)} sub="impresiones únicas" delta={11.3} />
+        <KpiCard label="País Principal" value={`${topCountry.flag} ${topCountry.country}`} sub={`ROAS ${topCountry.roas}x`} />
+        <KpiCard label="Mejor Placement" value={topPlacement.name} sub={`ROAS ${topPlacement.roas}x`} />
+        <KpiCard label="Dispositivo Top" value="📱 Móvil" sub="68% del tráfico" />
+      </div>
+
+      {/* Edad + género y dispositivos */}
+      <div style={{ display:'grid', gridTemplateColumns:'2fr 1fr', gap:16, marginBottom:24 }}>
+        <Card>
+          <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>Distribución por edad y género</div>
+          <div style={{ display:'flex', gap:16, fontSize:12, marginBottom:8 }}>
+            <span style={{ color:AC }}>■ Masculino</span>
+            <span style={{ color:BL }}>■ Femenino</span>
+          </div>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={AGE_GENDER}>
+              <CartesianGrid stroke={BRD} vertical={false} />
+              <XAxis dataKey="age" stroke={SEC} fontSize={11} />
+              <YAxis stroke={SEC} fontSize={11} tickFormatter={v => fmtNum(v)} />
+              <Tooltip contentStyle={{ background:CRD, border:`1px solid ${BRD}`, borderRadius:8 }} formatter={(v, n) => [fmtNum(v), n === 'male' ? 'Masculino' : 'Femenino']} />
+              <Bar dataKey="male"   name="Masculino" fill={AC} radius={[4,4,0,0]} />
+              <Bar dataKey="female" name="Femenino"  fill={BL} radius={[4,4,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+        <Card>
+          <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>Dispositivos</div>
+          <ResponsiveContainer width="100%" height={200}>
+            <PieChart>
+              <Pie data={DEVICES} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
+                {DEVICES.map((_, i) => <Cell key={i} fill={deviceColors[i]} />)}
+              </Pie>
+              <Tooltip contentStyle={{ background:CRD, border:`1px solid ${BRD}`, borderRadius:8 }} formatter={v => v + '%'} />
+            </PieChart>
+          </ResponsiveContainer>
+          <div style={{ display:'flex', flexDirection:'column', gap:8, marginTop:8 }}>
+            {DEVICES.map((d, i) => (
+              <div key={d.name} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', fontSize:13 }}>
+                <span style={{ display:'flex', alignItems:'center', gap:8 }}>
+                  <span style={{ width:10, height:10, background:deviceColors[i], borderRadius:2 }} />
+                  {d.name}
+                </span>
+                <span style={{ fontWeight:600 }}>{d.value}%</span>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* ROAS por edad y placements */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16, marginBottom:24 }}>
+        <Card>
+          <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>ROAS por rango de edad</div>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={AGE_GENDER}>
+              <CartesianGrid stroke={BRD} vertical={false} />
+              <XAxis dataKey="age" stroke={SEC} fontSize={11} />
+              <YAxis stroke={SEC} fontSize={11} tickFormatter={v => v + 'x'} />
+              <Tooltip contentStyle={{ background:CRD, border:`1px solid ${BRD}`, borderRadius:8 }} formatter={v => v + 'x'} />
+              <Bar dataKey="roas" radius={[4,4,0,0]}>
+                {AGE_GENDER.map((a, i) => <Cell key={i} fill={roasColor(a.roas)} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+        <Card>
+          <div style={{ color:SEC, fontSize:11, textTransform:'uppercase', letterSpacing:1, marginBottom:16 }}>Placements por gasto</div>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={PLACEMENTS} layout="vertical">
+              <CartesianGrid stroke={BRD} horizontal={false} />
+              <XAxis type="number" stroke={SEC} fontSize={11} tickFormatter={v => fmtCOP(v)} />
+              <YAxis type="category" dataKey="name" stroke={SEC} fontSize={11} width={110} />
+              <Tooltip contentStyle={{ background:CRD, border:`1px solid ${BRD}`, borderRadius:8 }} formatter={v => fmtCOP(v)} />
+              <Bar dataKey="spend" fill={AC} radius={[0,4,4,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+      </div>
+
+      {/* Geografía */}
+      <Card style={{ marginBottom:24 }}>
+        <div style={{ fontSize:15, fontWeight:600, marginBottom:16 }}>Top ubicaciones geográficas</div>
+        <table style={{ width:'100%', borderCollapse:'collapse', fontSize:13 }}>
+          <thead>
+            <tr style={{ color:SEC, fontSize:11, textTransform:'uppercase' }}>
+              <th style={{ textAlign:'left',  padding:'10px 8px', borderBottom:`1px solid ${BRD}` }}>#</th>
+              <th style={{ textAlign:'left',  padding:'10px 8px', borderBottom:`1px solid ${BRD}` }}>País</th>
+              <th style={{ textAlign:'right', padding:'10px 8px', borderBottom:`1px solid ${BRD}` }}>Gasto</th>
+              <th style={{ textAlign:'right', padding:'10px 8px', borderBottom:`1px solid ${BRD}` }}>Impresiones</th>
+              <th style={{ textAlign:'right', padding:'10px 8px', borderBottom:`1px solid ${BRD}` }}>Clics</th>
+              <th style={{ textAlign:'right', padding:'10px 8px', borderBottom:`1px solid ${BRD}` }}>ROAS</th>
+            </tr>
+          </thead>
+          <tbody>
+            {GEO.map((g, i) => (
+              <tr key={g.country}>
+                <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}`, color:SEC }}>{i + 1}</td>
+                <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}` }}>{g.flag} {g.country}</td>
+                <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}`, textAlign:'right' }}>{fmtCOP(g.spend)}</td>
+                <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}`, textAlign:'right' }}>{fmtNum(g.impressions)}</td>
+                <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}`, textAlign:'right' }}>{fmtNum(g.clicks)}</td>
+                <td style={{ padding:'12px 8px', borderBottom:`1px solid ${BRD}`, textAlign:'right', color:roasColor(g.roas), fontWeight:600 }}>{g.roas}x</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </Card>
+
+      {/* Intereses */}
       <Card>
-        <div style={{ textAlign:'center', padding:40, color:SEC }}>
-          <div style={{ fontSize:48, marginBottom:12 }}>👥</div>
-          <div style={{ fontSize:16, fontWeight:600, color:TXT, marginBottom:8 }}>Sección en construcción</div>
-          <div>Segmentación por edad, género, intereses y rendimiento por audiencia.</div>
+        <div style={{ fontSize:15, fontWeight:600, marginBottom:16 }}>Intereses y afinidades</div>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:12 }}>
+          {INTERESTS.map(it => (
+            <div key={it.name} style={{ padding:14, border:`1px solid ${BRD}`, borderRadius:10, background:'rgba(200,113,74,0.04)' }}>
+              <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
+                <span style={{ fontSize:14, fontWeight:600 }}>{it.name}</span>
+                <span style={{ fontSize:12, color:GR, fontWeight:600 }}>{it.engagement}% eng.</span>
+              </div>
+              <div style={{ fontSize:12, color:SEC, marginBottom:8 }}>Audiencia potencial: {fmtNum(it.audience)}</div>
+              <div style={{ height:5, background:BRD, borderRadius:3, overflow:'hidden' }}>
+                <div style={{ width:`${(it.engagement / 7) * 100}%`, height:'100%', background:AC }} />
+              </div>
+            </div>
+          ))}
         </div>
       </Card>
     </>
   )
 }
 
-/* ── PÁGINA: PRESUPUESTO (placeholder) ────────────────────── */
+/* ── PÁGINA: PRESUPUESTO ──────────────────────────────────── */
 function PageBudget() {
   const total = CAMPAIGNS.reduce((s, c) => s + c.budget, 0)
   const spent = CAMPAIGNS.reduce((s, c) => s + c.spend, 0)
@@ -489,7 +760,6 @@ function PageBudget() {
       <Card>
         <div style={{ fontSize:15, fontWeight:600, marginBottom:16 }}>Presupuesto por campaña</div>
         {CAMPAIGNS.map(c => {
-          const ratio = Math.min((c.budget * 60) / c.spend, 2)
           const pct = Math.round((c.spend / (c.budget * 60)) * 100)
           return (
             <div key={c.id} style={{ marginBottom:16 }}>
@@ -511,16 +781,14 @@ function PageBudget() {
 /* ── APP (navegación funcional) ───────────────────────────── */
 export default function App() {
   const [section, setSection] = useState('overview')
-
   const menu = [
-    { id:'overview',    label:'Vista General' },
-    { id:'campaigns',   label:'Campañas' },
-    { id:'analytics',   label:'Analítica' },
-    { id:'creatives',   label:'Creatividades' },
-    { id:'audiences',   label:'Audiencias' },
-    { id:'budget',      label:'Presupuesto' },
+    { id:'overview',   label:'Vista General' },
+    { id:'campaigns',  label:'Campañas' },
+    { id:'analytics',  label:'Analítica' },
+    { id:'creatives',  label:'Creatividades' },
+    { id:'audiences',  label:'Audiencias' },
+    { id:'budget',     label:'Presupuesto' },
   ]
-
   const renderSection = () => {
     switch (section) {
       case 'overview':   return <PageOverview />
@@ -532,7 +800,6 @@ export default function App() {
       default:           return <PageOverview />
     }
   }
-
   return (
     <div style={{ background:BG, color:TXT, minHeight:'100vh', display:'flex', fontFamily:'-apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}>
       <aside style={{ width:220, background:CRD, borderRight:`1px solid ${BRD}`, padding:'24px 16px' }}>
@@ -549,8 +816,7 @@ export default function App() {
                 padding:'10px 12px', borderRadius:8, marginBottom:4,
                 color: active ? AC : SEC, fontSize:14,
                 background: active ? 'rgba(200,113,74,0.1)' : 'transparent',
-                cursor:'pointer',
-                transition:'all .15s',
+                cursor:'pointer', transition:'all .15s',
               }}
               onMouseEnter={e => { if (!active) e.currentTarget.style.color = TXT }}
               onMouseLeave={e => { if (!active) e.currentTarget.style.color = SEC }}
