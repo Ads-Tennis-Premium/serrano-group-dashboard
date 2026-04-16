@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
   PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, ComposedChart,
 } from 'recharts'
+import { useMetaData, ConnStatus, fmtMoney, fmtNum, fmtPct, fmtX, findAction, bestRoas } from './meta'
 
 /* ── COLORES ──────────────────────────────────────────────── */
 const AC  = '#C8714A'
@@ -214,6 +215,7 @@ function Calendar({ data, selectedDate, onSelect }) {
 
 /* ── PÁGINA: VISTA GENERAL ────────────────────────────────── */
 function PageOverview() {
+  const meta = useMetaData('overview', 'today')
   const [range, setRange] = useState('30')
   const [selectedDate, setSelectedDate] = useState(DAILY[DAILY.length - 1].date)
   const sliced = useMemo(() => {
@@ -237,6 +239,8 @@ function PageOverview() {
   const rangeLabel = range === 'cal' ? `Día ${selectedDate}` : range === '1' ? 'Hoy' : `Últimos ${range} días`
   return (
     <>
+      <ConnStatus meta={meta} label="Vista General" datePreset="today" />
+
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', paddingBottom:20, borderBottom:`1px solid ${BRD}`, marginBottom:24 }}>
         <div style={{ fontSize:16, color:SEC }}>Vista General</div>
         <div style={{ display:'flex', gap:12, alignItems:'center' }}>
@@ -381,10 +385,13 @@ function PageOverview() {
 
 /* ── PÁGINA: CAMPAÑAS ─────────────────────────────────────── */
 function PageCampaigns() {
+  const meta = useMetaData('campaigns', 'today')
   const total = CAMPAIGNS.reduce((s, c) => s + c.spend, 0)
   const activas = CAMPAIGNS.filter(c => c.status === 'ACTIVE').length
   return (
     <>
+      <ConnStatus meta={meta} label="Campañas" datePreset="today" />
+
       <h1 style={{ fontSize:28, fontWeight:700, marginBottom:6 }}>Campañas</h1>
       <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>Listado completo de campañas activas y pausadas</div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:16, marginBottom:24 }}>
@@ -433,9 +440,12 @@ function PageCampaigns() {
 
 /* ── PÁGINA: ANALÍTICA ────────────────────────────────────── */
 function PageAnalytics() {
+  const meta = useMetaData('daily', 'today')
   const last30 = DAILY.slice(-30)
   return (
     <>
+      <ConnStatus meta={meta} label="Analítica" datePreset="today" />
+
       <h1 style={{ fontSize:28, fontWeight:700, marginBottom:6 }}>Analítica</h1>
       <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>Evolución de impresiones, clics y CTR en los últimos 30 días</div>
       <Card style={{ marginBottom:24 }}>
@@ -476,6 +486,7 @@ function PageAnalytics() {
 
 /* ── PÁGINA: CREATIVIDADES (contenido real) ───────────────── */
 function PageCreatives() {
+  const meta = useMetaData('creatives', 'today')
   const [perf, setPerf] = useState('all')
   const [fmt, setFmt]   = useState('all')
 
@@ -507,6 +518,8 @@ function PageCreatives() {
 
   return (
     <>
+      <ConnStatus meta={meta} label="Creatividades" datePreset="today" />
+
       <h1 style={{ fontSize:28, fontWeight:700, marginBottom:6 }}>Creatividades</h1>
       <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>Biblioteca de anuncios y rendimiento por creativo</div>
 
@@ -602,6 +615,7 @@ function PageCreatives() {
 
 /* ── PÁGINA: AUDIENCIAS (contenido real) ──────────────────── */
 function PageAudiences() {
+  const meta = useMetaData('audiences_age_gender', 'today')
   const deviceColors = [AC, BL, PU]
   const roasColor = r => r > 4 ? GR : r >= 3 ? AM : RE
   const totalAudienceReach = AGE_GENDER.reduce((s, a) => s + a.male + a.female, 0)
@@ -610,6 +624,8 @@ function PageAudiences() {
 
   return (
     <>
+      <ConnStatus meta={meta} label="Audiencias" datePreset="today" />
+
       <h1 style={{ fontSize:28, fontWeight:700, marginBottom:6 }}>Audiencias</h1>
       <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>Demografía, dispositivos, ubicaciones geográficas e intereses</div>
 
@@ -746,10 +762,13 @@ function PageAudiences() {
 
 /* ── PÁGINA: PRESUPUESTO ──────────────────────────────────── */
 function PageBudget() {
+  const meta = useMetaData('campaigns', 'today')
   const total = CAMPAIGNS.reduce((s, c) => s + c.budget, 0)
   const spent = CAMPAIGNS.reduce((s, c) => s + c.spend, 0)
   return (
     <>
+      <ConnStatus meta={meta} label="Presupuesto" datePreset="today" />
+
       <h1 style={{ fontSize:28, fontWeight:700, marginBottom:6 }}>Presupuesto</h1>
       <div style={{ color:SEC, fontSize:14, marginBottom:24 }}>Control de gasto por campaña</div>
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:16, marginBottom:24 }}>
