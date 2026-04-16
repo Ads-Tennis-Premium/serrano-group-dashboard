@@ -26,10 +26,11 @@ function generateDailyData() {
     d.setDate(d.getDate() - i)
     // Gasto diario entre ~1.8M y ~2.6M COP
     const spend = Math.round(1800000 + Math.sin(i / 3) * 300000 + Math.random() * 500000)
-    const impressions = Math.round(spend * (90 + Math.random() * 20)) / 9 // ~20M-25M
-    const impressionsR = Math.round(impressions)
-    const clicks = Math.round(impressionsR * (0.028 + Math.random() * 0.012))
-    // CPA realista: ~COP 50000-80000, entonces purchases = spend / CPA target
+    // Impresiones diarias: ~250K-350K
+    const impressions = Math.round(260000 + Math.random() * 80000)
+    // Clics: CTR entre 2.8% y 4%
+    const clicks = Math.round(impressions * (0.028 + Math.random() * 0.012))
+    // CPA realista: ~COP 45000-70000
     const cpaTarget = 45000 + Math.random() * 25000
     const purchases = Math.max(1, Math.round(spend / cpaTarget))
     const roasBase = 3.8 + Math.random() * 1.4
@@ -40,13 +41,13 @@ function generateDailyData() {
       date: d.toISOString().slice(0, 10),
       label: `${d.getDate()}/${d.getMonth() + 1}`,
       spend,
-      impressions: impressionsR,
+      impressions,
       clicks,
       purchases,
       revenue,
       addToCart,
       checkout,
-      ctr: +((clicks / impressionsR) * 100).toFixed(2),
+      ctr: +((clicks / impressions) * 100).toFixed(2),
       cpc: Math.round(spend / clicks),
       cpa: Math.round(spend / purchases),
       roas: +(revenue / spend).toFixed(2),
